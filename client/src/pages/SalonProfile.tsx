@@ -96,7 +96,10 @@ export default function SalonProfile() {
       setLocation('/auth');
       return;
     }
-    joinQueueMutation.mutate(data);
+    joinQueueMutation.mutate({
+      ...data,
+      userId: user.id,
+    });
   };
 
   const onReviewSubmit = (data: ReviewForm) => {
@@ -107,6 +110,7 @@ export default function SalonProfile() {
     addReviewMutation.mutate({
       ...data,
       salonId: id!,
+      userId: user.id,
     });
   };
 
@@ -363,6 +367,7 @@ export default function SalonProfile() {
                             <Textarea 
                               placeholder="Share your experience..." 
                               {...field} 
+                              value={field.value || ""}
                               data-testid="textarea-comment"
                             />
                           </FormControl>

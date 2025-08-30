@@ -16,6 +16,19 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "smartq-secret-key";
 
+// Extend Express Request interface to include user
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        userId: string;
+        email: string;
+        role: string;
+      };
+    }
+  }
+}
+
 // Middleware for JWT authentication
 const authenticateToken = (req: any, res: any, next: any) => {
   const authHeader = req.headers.authorization;
@@ -59,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     ws.on('close', () => {
       // Remove client from map when disconnected
-      for (const [userId, client] of clients.entries()) {
+      for (const [userId, client] of Array.from(clients.entries())) {
         if (client === ws) {
           clients.delete(userId);
           console.log(`User ${userId} disconnected from WebSocket`);
@@ -149,7 +162,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/auth/profile', authenticateToken, async (req, res) => {
     try {
-      const user = await storage.getUser(req.user.userId);
+      const user = await storage.getUser(req.user!.userId);
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
@@ -221,13 +234,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/salons', authenticateToken, async (req, res) => {
     try {
-      if (req.user.role !== 'salon') {
+      if (req.user!.role !== 'salon') {
         return res.status(403).json({ message: 'Only salon owners can create salons' });
       }
 
       const salonData = insertSalonSchema.parse({
         ...req.body,
-        ownerId: req.user.userId,
+        ownerId: req.user!.userId,
       });
 
       const salon = await storage.createSalon(salonData);
@@ -244,11 +257,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Salon not found' });
       }
 
-      if (salon.ownerId !== req.user.userId) {
+      if (salon.ownerId !== req.user!.userId) {
         return res.status(403).json({ message: 'Not authorized to update this salon' });
       }
 
-      const updates = insertSalonSchema.partial().parse(req.body);
+      const updates = insertSalonSchema.partial().parse(req.body) as Partial<typeof salons.$inferInsert>;
       const updatedSalon = await storage.updateSalon(req.params.id, updates);
       res.json(updatedSalon);
     } catch (error) {
@@ -272,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Verify salon ownership
       const salon = await storage.getSalon(serviceData.salonId);
-      if (!salon || salon.ownerId !== req.user.userId) {
+      if (!salon || salon.ownerId !== req.user!.userId) {
         return res.status(403).json({ message: 'Not authorized to add services to this salon' });
       }
 
@@ -286,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Queue routes
   app.get('/api/queues/my', authenticateToken, async (req, res) => {
     try {
-      const queues = await storage.getQueuesByUser(req.user.userId);
+      const queues = await storage.getQueuesByUser(req.user!.userId);
       
       // Get additional details for each queue
       const queuesWithDetails = await Promise.all(
@@ -314,7 +327,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Salon not found' });
       }
 
-      if (salon.ownerId !== req.user.userId) {
+      if (salon.ownerId !== req.user!.userId) {
         return res.status(403).json({ message: 'Not authorized to view salon queues' });
       }
 
@@ -343,11 +356,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const queueData = insertQueueSchema.parse({
         ...req.body,
-        userId: req.user.userId,
+        userId: req.user!.userId,
       });
 
       // Check if user is already in queue for this salon
-      const existingQueue = await storage.getUserQueuePosition(req.user.userId, queueData.salonId);
+      const existingQueue = await storage.getUserQueuePosition(req.user!.userId, queueData.salonId);
       if (existingQueue) {
         return res.status(400).json({ message: 'Already in queue for this salon' });
       }
@@ -373,7 +386,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check authorization
       const salon = await storage.getSalon(queue.salonId);
-      if (queue.userId !== req.user.userId && salon?.ownerId !== req.user.userId) {
+      if (queue.userId !== req.user!.userId && salon?.ownerId !== req.user!.userId) {
         return res.status(403).json({ message: 'Not authorized to update this queue entry' });
       }
 
@@ -397,7 +410,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Queue entry not found' });
       }
 
-      if (queue.userId !== req.user.userId) {
+      if (queue.userId !== req.user!.userId) {
         return res.status(403).json({ message: 'Not authorized to leave this queue' });
       }
 
@@ -429,7 +442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Verify salon ownership
       const salon = await storage.getSalon(offerData.salonId);
-      if (!salon || salon.ownerId !== req.user.userId) {
+      if (!salon || salon.ownerId !== req.user!.userId) {
         return res.status(403).json({ message: 'Not authorized to create offers for this salon' });
       }
 
@@ -445,7 +458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const reviewData = insertReviewSchema.parse({
         ...req.body,
-        userId: req.user.userId,
+        userId: req.user!.userId,
       });
 
       const review = await storage.createReview(reviewData);
@@ -465,7 +478,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/analytics/:salonId', authenticateToken, async (req, res) => {
     try {
       const salon = await storage.getSalon(req.params.salonId);
-      if (!salon || salon.ownerId !== req.user.userId) {
+      if (!salon || salon.ownerId !== req.user!.userId) {
         return res.status(403).json({ message: 'Not authorized to view analytics for this salon' });
       }
 

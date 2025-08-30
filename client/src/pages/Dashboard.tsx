@@ -49,7 +49,7 @@ export default function Dashboard() {
   const { data: salons = [], isLoading: salonsLoading } = useQuery({
     queryKey: ['/api/salons'],
     enabled: !!user && user.role === 'salon',
-    select: (data) => data.filter((salon: any) => salon.ownerId === user?.id),
+    select: (data: any[]) => data.filter((salon: any) => salon.ownerId === user?.id),
   });
 
   // Auto-select first salon if none selected
@@ -180,7 +180,10 @@ export default function Dashboard() {
   });
 
   const onSalonSubmit = (data: SalonForm) => {
-    createSalonMutation.mutate(data);
+    createSalonMutation.mutate({
+      ...data,
+      ownerId: user!.id,
+    });
   };
 
   const onServiceSubmit = (data: ServiceForm) => {
@@ -315,6 +318,7 @@ export default function Dashboard() {
                             <Textarea 
                               placeholder="Describe your salon..." 
                               {...field} 
+                              value={field.value || ""}
                               data-testid="textarea-salon-description"
                             />
                           </FormControl>
@@ -610,6 +614,7 @@ export default function Dashboard() {
                                           <Textarea 
                                             placeholder="Service description..." 
                                             {...field} 
+                                            value={field.value || ""}
                                             data-testid="textarea-service-description"
                                           />
                                         </FormControl>

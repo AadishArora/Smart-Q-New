@@ -41,24 +41,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   // Verify token with server when user is set
-  const { isLoading: isVerifying } = useQuery({
+  const { isLoading: isVerifying, error } = useQuery({
     queryKey: ['/api/auth/profile'],
     queryFn: api.auth.getProfile,
     enabled: !!token && !!user && isInitialized,
     retry: false,
     refetchOnWindowFocus: false,
-    onError: () => {
+  });
+
+  // Handle auth errors
+  useEffect(() => {
+    if (error) {
       // Token is invalid, clear auth state
       logout();
-    },
-    onSuccess: (userData) => {
-      // Update user data if it changed on server
-      if (JSON.stringify(userData) !== JSON.stringify(user)) {
-        setUser(userData);
-        localStorage.setItem('smartq_user', JSON.stringify(userData));
-      }
-    },
-  });
+    }
+  }, [error]);
 
   const login = (userData: User, authToken: string) => {
     setUser(userData);

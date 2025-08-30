@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock, Star, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "../context/AuthContext";
-import { useWebSocket } from "../context/WebSocketContext";
+import { useWebSocket } from "../context/WebSocketContext.tsx";
 import { api } from "../lib/api";
 import { queryClient } from "../lib/queryClient";
 import type { QueueWithDetails } from "../types";

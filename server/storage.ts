@@ -94,6 +94,7 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
+      role: insertUser.role || "customer",
       loyaltyPoints: 0,
       createdAt: new Date(),
     };
@@ -134,7 +135,7 @@ export class MemStorage implements IStorage {
       ...insertSalon,
       id,
       rating: "0.0",
-      images: insertSalon.images || [],
+      images: (insertSalon.images as string[]) || [],
       createdAt: new Date(),
     };
     this.salons.set(id, salon);
@@ -167,6 +168,7 @@ export class MemStorage implements IStorage {
     const service: Service = {
       ...insertService,
       id,
+      description: insertService.description || null,
       createdAt: new Date(),
     };
     this.services.set(id, service);
@@ -218,8 +220,10 @@ export class MemStorage implements IStorage {
     const queue: Queue = {
       ...insertQueue,
       id,
+      status: insertQueue.status || "waiting",
       position,
       timestamp: new Date(),
+      estimatedWaitTime: insertQueue.estimatedWaitTime || null,
     };
     this.queues.set(id, queue);
     return queue;
@@ -258,6 +262,7 @@ export class MemStorage implements IStorage {
     const offer: Offer = {
       ...insertOffer,
       id,
+      isActive: insertOffer.isActive !== undefined ? insertOffer.isActive : true,
       createdAt: new Date(),
     };
     this.offers.set(id, offer);
@@ -290,6 +295,7 @@ export class MemStorage implements IStorage {
     const review: Review = {
       ...insertReview,
       id,
+      comment: insertReview.comment || null,
       createdAt: new Date(),
     };
     this.reviews.set(id, review);
