@@ -41,18 +41,23 @@ export default function Home() {
                 <Button 
                   size="lg" 
                   className="px-8 py-4 font-semibold shadow-lg hover:shadow-xl"
+                  onClick={() => {
+                    document.getElementById('featured-salons')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
                   data-testid="button-find-salons"
                 >
                   Find Salons Near You
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="px-8 py-4 font-semibold"
-                  data-testid="button-salon-owners"
-                >
-                  For Salon Owners
-                </Button>
+                <Link href="/auth">
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    className="px-8 py-4 font-semibold w-full"
+                    data-testid="button-salon-owners"
+                  >
+                    For Salon Owners
+                  </Button>
+                </Link>
               </div>
               
               {/* Search Bar */}
@@ -82,6 +87,13 @@ export default function Home() {
                   </div>
                   <Button 
                     className="px-8 py-3 font-semibold"
+                    onClick={() => {
+                      // Search functionality is already handled by state updates
+                      // This button can scroll to results or show a toast
+                      if (searchQuery || location) {
+                        document.getElementById('featured-salons')?.scrollIntoView({ behavior: 'smooth' });
+                      }
+                    }}
                     data-testid="button-search"
                   >
                     Search
@@ -116,10 +128,12 @@ export default function Home() {
       </section>
 
       {/* Featured Salons Section */}
-      <section className="py-16 bg-background">
+      <section id="featured-salons" className="py-16 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Popular Salons Near You</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              {searchQuery || location ? 'Search Results' : 'Popular Salons Near You'}
+            </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Discover top-rated salons with the shortest wait times and best reviews
             </p>
@@ -136,6 +150,27 @@ export default function Home() {
                   <div className="h-10 bg-muted rounded"></div>
                 </div>
               ))}
+            </div>
+          ) : filteredSalons.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="w-24 h-24 bg-primary/10 rounded-full mx-auto mb-6 flex items-center justify-center">
+                <MapPin className="text-primary h-12 w-12" />
+              </div>
+              <h3 className="text-2xl font-semibold text-foreground mb-4">
+                {searchQuery || location ? 'No salons found' : 'No salons available yet'}
+              </h3>
+              <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                {searchQuery || location 
+                  ? 'Try adjusting your search criteria or check back later.' 
+                  : 'New salons are joining SmartQ every day. Check back soon or sign up as a salon owner!'}
+              </p>
+              {!searchQuery && !location && (
+                <Link href="/auth">
+                  <Button size="lg" className="font-semibold">
+                    Become a Salon Owner
+                  </Button>
+                </Link>
+              )}
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
