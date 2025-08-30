@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,7 +7,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "../context/AuthContext";
@@ -51,6 +50,15 @@ export default function Auth() {
     mode: "onChange",
   });
 
+  // Debug: Monitor form values
+  useEffect(() => {
+    console.log('Login form values:', loginForm.watch());
+  }, [loginForm.watch()]);
+
+  useEffect(() => {
+    console.log('Register form values:', registerForm.watch());
+  }, [registerForm.watch()]);
+
   const loginMutation = useMutation({
     mutationFn: api.auth.login,
     onSuccess: (data) => {
@@ -90,11 +98,14 @@ export default function Auth() {
   });
 
   const onLoginSubmit = (data: LoginForm) => {
+    console.log('Login form submitted with:', data);
     loginMutation.mutate(data);
   };
 
   const onRegisterSubmit = (data: RegisterForm) => {
+    console.log('Register form submitted with:', data);
     const { confirmPassword, ...userData } = data;
+    console.log('Sending to API:', userData);
     registerMutation.mutate(userData);
   };
 
@@ -113,159 +124,143 @@ export default function Auth() {
         </CardHeader>
         <CardContent>
           {isLogin ? (
-            <Form {...loginForm}>
-              <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                <FormField
-                  control={loginForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="email" 
-                          placeholder="Enter your email" 
-                          {...field} 
-                          data-testid="input-email"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="login-email" className="text-sm font-medium text-foreground">
+                  Email
+                </label>
+                <Input 
+                  id="login-email"
+                  type="email" 
+                  placeholder="Enter your email" 
+                  {...loginForm.register("email")}
+                  data-testid="input-email"
                 />
-                <FormField
-                  control={loginForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Enter your password" 
-                          {...field} 
-                          data-testid="input-password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                {loginForm.formState.errors.email && (
+                  <p className="text-sm text-destructive">{loginForm.formState.errors.email.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="login-password" className="text-sm font-medium text-foreground">
+                  Password
+                </label>
+                <Input 
+                  id="login-password"
+                  type="password" 
+                  placeholder="Enter your password" 
+                  {...loginForm.register("password")}
+                  data-testid="input-password"
                 />
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={loginMutation.isPending}
-                  data-testid="button-login"
-                >
-                  {loginMutation.isPending ? "Signing in..." : "Sign In"}
-                </Button>
-              </form>
-            </Form>
+                {loginForm.formState.errors.password && (
+                  <p className="text-sm text-destructive">{loginForm.formState.errors.password.message}</p>
+                )}
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={loginMutation.isPending}
+                data-testid="button-login"
+              >
+                {loginMutation.isPending ? "Signing in..." : "Sign In"}
+              </Button>
+            </form>
           ) : (
-            <Form {...registerForm}>
-              <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                <FormField
-                  control={registerForm.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Full Name</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Enter your full name" 
-                          {...field} 
-                          data-testid="input-name"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="register-name" className="text-sm font-medium text-foreground">
+                  Full Name
+                </label>
+                <Input 
+                  id="register-name"
+                  placeholder="Enter your full name" 
+                  {...registerForm.register("name")}
+                  data-testid="input-name"
                 />
-                <FormField
-                  control={registerForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="email" 
-                          placeholder="Enter your email" 
-                          {...field} 
-                          data-testid="input-email"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                {registerForm.formState.errors.name && (
+                  <p className="text-sm text-destructive">{registerForm.formState.errors.name.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="register-email" className="text-sm font-medium text-foreground">
+                  Email
+                </label>
+                <Input 
+                  id="register-email"
+                  type="email" 
+                  placeholder="Enter your email" 
+                  {...registerForm.register("email")}
+                  data-testid="input-email"
                 />
-                <FormField
-                  control={registerForm.control}
-                  name="role"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Account Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger data-testid="select-role">
-                            <SelectValue placeholder="Select account type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="customer">Customer</SelectItem>
-                          <SelectItem value="salon">Salon Owner</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={registerForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Password</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Create a password" 
-                          {...field} 
-                          data-testid="input-password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={registerForm.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirm Password</FormLabel>
-                      <FormControl>
-                        <Input 
-                          type="password" 
-                          placeholder="Confirm your password" 
-                          {...field} 
-                          data-testid="input-confirm-password"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={registerMutation.isPending}
-                  data-testid="button-register"
+                {registerForm.formState.errors.email && (
+                  <p className="text-sm text-destructive">{registerForm.formState.errors.email.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="register-role" className="text-sm font-medium text-foreground">
+                  Account Type
+                </label>
+                <Select 
+                  onValueChange={(value) => registerForm.setValue("role", value as "customer" | "salon")}
+                  defaultValue={registerForm.getValues("role")}
                 >
-                  {registerMutation.isPending ? "Creating account..." : "Create Account"}
-                </Button>
-              </form>
-            </Form>
+                  <SelectTrigger id="register-role" data-testid="select-role">
+                    <SelectValue placeholder="Select account type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="customer">Customer</SelectItem>
+                    <SelectItem value="salon">Salon Owner</SelectItem>
+                  </SelectContent>
+                </Select>
+                {registerForm.formState.errors.role && (
+                  <p className="text-sm text-destructive">{registerForm.formState.errors.role.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="register-password" className="text-sm font-medium text-foreground">
+                  Password
+                </label>
+                <Input 
+                  id="register-password"
+                  type="password" 
+                  placeholder="Create a password" 
+                  {...registerForm.register("password")}
+                  data-testid="input-password"
+                />
+                {registerForm.formState.errors.password && (
+                  <p className="text-sm text-destructive">{registerForm.formState.errors.password.message}</p>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="register-confirm-password" className="text-sm font-medium text-foreground">
+                  Confirm Password
+                </label>
+                <Input 
+                  id="register-confirm-password"
+                  type="password" 
+                  placeholder="Confirm your password" 
+                  {...registerForm.register("confirmPassword")}
+                  data-testid="input-confirm-password"
+                />
+                {registerForm.formState.errors.confirmPassword && (
+                  <p className="text-sm text-destructive">{registerForm.formState.errors.confirmPassword.message}</p>
+                )}
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={registerMutation.isPending}
+                data-testid="button-register"
+              >
+                {registerMutation.isPending ? "Creating account..." : "Create Account"}
+              </Button>
+            </form>
           )}
 
           <div className="mt-6 text-center">
@@ -274,8 +269,12 @@ export default function Auth() {
               className="text-sm"
               onClick={() => {
                 setIsLogin(!isLogin);
-                loginForm.reset();
-                registerForm.reset();
+                // Only reset the form that's being switched to
+                if (isLogin) {
+                  registerForm.reset();
+                } else {
+                  loginForm.reset();
+                }
               }}
               data-testid="button-toggle-auth"
             >

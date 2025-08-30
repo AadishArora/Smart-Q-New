@@ -4,13 +4,13 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "./context/AuthContext";
-import { WebSocketProvider } from "./context/WebSocketContext.tsx";
+import { WebSocketProvider } from "./context/WebSocketContext";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import SalonProfile from "./pages/SalonProfile";
 import Queue from "./pages/Queue";
-import Dashboard from "./pages/Dashboard.tsx";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {

@@ -136,6 +136,8 @@ export class MemStorage implements IStorage {
       id,
       rating: "0.0",
       images: (insertSalon.images as string[]) || [],
+      description: insertSalon.description || null,
+      operatingHours: insertSalon.operatingHours as Salon['operatingHours'] || null,
       createdAt: new Date(),
     };
     this.salons.set(id, salon);

@@ -10,6 +10,7 @@ import {
   insertOfferSchema,
   insertReviewSchema,
   loginSchema,
+  type Salon,
 } from "@shared/schema";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -261,8 +262,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: 'Not authorized to update this salon' });
       }
 
-      const updates = insertSalonSchema.partial().parse(req.body) as Partial<typeof salons.$inferInsert>;
-      const updatedSalon = await storage.updateSalon(req.params.id, updates);
+      const updates = insertSalonSchema.partial().parse(req.body);
+      // Ensure proper typing for the updates
+      const typedUpdates: Partial<Salon> = {
+        ...updates,
+        description: updates.description || null,
+        operatingHours: updates.operatingHours as Salon['operatingHours'] || null,
+        images: updates.images as string[] || null,
+      };
+      const updatedSalon = await storage.updateSalon(req.params.id, typedUpdates);
       res.json(updatedSalon);
     } catch (error) {
       res.status(400).json({ message: 'Invalid update data', error });

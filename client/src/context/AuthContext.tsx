@@ -58,13 +58,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [error]);
 
   const login = (userData: User, authToken: string) => {
+    console.log('Login called with:', { userData, authToken });
     setUser(userData);
     setToken(authToken);
     localStorage.setItem('smartq_token', authToken);
     localStorage.setItem('smartq_user', JSON.stringify(userData));
-    
-    // Set authorization header for future requests
-    document.cookie = `smartq_token=${authToken}; path=/; max-age=${24 * 60 * 60}; SameSite=Strict`;
+    console.log('Token stored in localStorage:', localStorage.getItem('smartq_token'));
   };
 
   const logout = () => {
@@ -72,23 +71,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setToken(null);
     localStorage.removeItem('smartq_token');
     localStorage.removeItem('smartq_user');
-    document.cookie = 'smartq_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   };
 
-  // Update authorization header when token changes
-  useEffect(() => {
-    if (token) {
-      // Set the token in a way that apiRequest can access it
-      const originalFetch = window.fetch;
-      window.fetch = (input, init = {}) => {
-        const headers = new Headers(init.headers);
-        if (token && !headers.has('Authorization')) {
-          headers.set('Authorization', `Bearer ${token}`);
-        }
-        return originalFetch(input, { ...init, headers });
-      };
-    }
-  }, [token]);
+  // Note: Authorization headers are now handled in the apiRequest function
+  // which reads the token from localStorage
 
   const value: AuthContextType = {
     user,

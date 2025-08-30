@@ -1,11 +1,12 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Clock, Star, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "../context/AuthContext";
-import { useWebSocket } from "../context/WebSocketContext.tsx";
+import { useWebSocket } from "../context/WebSocketContext";
 import { api } from "../lib/api";
 import { queryClient } from "../lib/queryClient";
 import type { QueueWithDetails } from "../types";
@@ -14,6 +15,7 @@ export default function Queue() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { connected } = useWebSocket();
+  const [, setLocation] = useLocation();
 
   const { data: queues = [], isLoading } = useQuery<QueueWithDetails[]>({
     queryKey: ['/api/queues/my'],
@@ -93,7 +95,10 @@ export default function Queue() {
               <p className="text-muted-foreground mb-6">
                 You haven't joined any queues yet. Find a salon and join your first queue!
               </p>
-              <Button data-testid="button-find-salons">
+              <Button 
+                data-testid="button-find-salons"
+                onClick={() => setLocation('/')}
+              >
                 Find Salons
               </Button>
             </CardContent>

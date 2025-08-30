@@ -196,9 +196,11 @@ export default function Dashboard() {
 
   const onOfferSubmit = (data: OfferForm) => {
     if (!selectedSalonId) return;
+    console.log('Offer form data:', data);
     createOfferMutation.mutate({
       ...data,
       salonId: selectedSalonId,
+      validityPeriod: data.validityPeriod instanceof Date ? data.validityPeriod.toISOString() : data.validityPeriod,
     });
   };
 

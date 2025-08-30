@@ -13,15 +13,31 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [location, setLocation] = useState("");
 
-  const { data: salons = [], isLoading } = useQuery<SalonWithDetails[]>({
+  const { data: salons = [], isLoading, error } = useQuery<SalonWithDetails[]>({
     queryKey: ['/api/salons'],
   });
 
+  // Handle loading and error states
+  if (error) {
+    console.error('Error loading salons:', error);
+  }
+
   const filteredSalons = salons.filter(salon => {
+    // Ensure salon has required properties
+    if (!salon.name || !salon.location) {
+      console.warn('Salon missing required properties:', salon);
+      return false;
+    }
+    
     const matchesSearch = !searchQuery || salon.name.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesLocation = !location || salon.location.toLowerCase().includes(location.toLowerCase());
     return matchesSearch && matchesLocation;
   });
+
+  // Debug search functionality
+  console.log('Search state:', { searchQuery, location });
+  console.log('All salons:', salons);
+  console.log('Filtered salons:', filteredSalons);
 
   return (
     <div className="min-h-screen">
@@ -70,7 +86,10 @@ export default function Home() {
                       placeholder="Search salons or services..." 
                       className="pl-12 border-0 focus-visible:ring-0 bg-transparent"
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => {
+                        console.log('Search input changed:', e.target.value);
+                        setSearchQuery(e.target.value);
+                      }}
                       data-testid="input-search"
                     />
                   </div>
@@ -81,13 +100,17 @@ export default function Home() {
                       placeholder="Location" 
                       className="pl-12 border-0 focus-visible:ring-0 bg-transparent"
                       value={location}
-                      onChange={(e) => setLocation(e.target.value)}
+                      onChange={(e) => {
+                        console.log('Location input changed:', e.target.value);
+                        setLocation(e.target.value);
+                      }}
                       data-testid="input-location"
                     />
                   </div>
                   <Button 
                     className="px-8 py-3 font-semibold"
                     onClick={() => {
+                      console.log('Search button clicked:', { searchQuery, location });
                       // Search functionality is already handled by state updates
                       // This button can scroll to results or show a toast
                       if (searchQuery || location) {
