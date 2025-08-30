@@ -124,7 +124,6 @@ export default function Auth() {
                           type="email" 
                           placeholder="Enter your email" 
                           {...field} 
-                          value={field.value || ""}
                           data-testid="input-email"
                         />
                       </FormControl>
@@ -143,7 +142,6 @@ export default function Auth() {
                           type="password" 
                           placeholder="Enter your password" 
                           {...field} 
-                          value={field.value || ""}
                           data-testid="input-password"
                         />
                       </FormControl>
@@ -174,7 +172,6 @@ export default function Auth() {
                         <Input 
                           placeholder="Enter your full name" 
                           {...field} 
-                          value={field.value || ""}
                           data-testid="input-name"
                         />
                       </FormControl>
@@ -193,7 +190,6 @@ export default function Auth() {
                           type="email" 
                           placeholder="Enter your email" 
                           {...field} 
-                          value={field.value || ""}
                           data-testid="input-email"
                         />
                       </FormControl>
@@ -233,7 +229,6 @@ export default function Auth() {
                           type="password" 
                           placeholder="Create a password" 
                           {...field} 
-                          value={field.value || ""}
                           data-testid="input-password"
                         />
                       </FormControl>
@@ -252,7 +247,6 @@ export default function Auth() {
                           type="password" 
                           placeholder="Confirm your password" 
                           {...field} 
-                          value={field.value || ""}
                           data-testid="input-confirm-password"
                         />
                       </FormControl>
