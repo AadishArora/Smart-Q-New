@@ -36,6 +36,7 @@ export default function Auth() {
       email: "",
       password: "",
     },
+    mode: "onChange",
   });
 
   const registerForm = useForm<RegisterForm>({
@@ -47,6 +48,7 @@ export default function Auth() {
       confirmPassword: "",
       role: "customer",
     },
+    mode: "onChange",
   });
 
   const loginMutation = useMutation({
@@ -270,7 +272,11 @@ export default function Auth() {
             <Button
               variant="ghost"
               className="text-sm"
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                loginForm.reset();
+                registerForm.reset();
+              }}
               data-testid="button-toggle-auth"
             >
               {isLogin 
